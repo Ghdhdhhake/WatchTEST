@@ -1,0 +1,53 @@
+# -------------------------
+# Keil / STM32 generated files
+# -------------------------
+/Debug/
+/Release/
+/Objects/
+/Listings/
+/build/
+/bin/
+/obj/
+/out/
+/DebugConfig/
+
+# Compiled output
+*.axf
+*.elf
+*.hex
+*.bin
+*.map
+*.crf
+*.d
+*.lst
+*.log
+*.htm
+*.srec
+*.out
+*.o
+*.obj
+*.a
+*.lib
+
+# Keil project/user-specific files
+*.uvguix.*
+*.uvoptx
+*.uvgui
+*.uvprojx.user
+*.scvd
+*.sct
+*.lnp
+*.dep
+
+# Editor / OS noise
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Backup / patch artifacts
+*.bak
+*.orig
+*.rej
