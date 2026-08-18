@@ -6,7 +6,6 @@
 #include "Key.h"
 #include "dino.h"
 //This si from branch dev
-//////////////////////////
 /**
   * 坐标轴定义：
   * 左上角为(0, 0)点
