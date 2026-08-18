@@ -30,7 +30,7 @@ int main(void)
 {
 	/*OLED初始化*/
 	OLED_Init();
-	OLED_Clear();
+	OLED_Clear();//清屏
 	Peripheral_Init();//外设初始化函数
 	int clkflag1;
 	
