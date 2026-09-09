@@ -132,7 +132,7 @@ flowchart TB
 flowchart LR
     MCU["STM32F103C8T6<br/>Cortex-M3 · 72MHz<br/>Flash 64KB · RAM 20KB"]
 
-    MCU -->|"PB8=SCL  PB9=SDA<br/>软件I2C（OLED.c 自带）"| O1["0.96 寸 OLED<br/>128×64"]
+    MCU -->|"PA8=SCL  PA9=SDA<br/>软件I2C（OLED.c 自带）"| O1["0.96 寸 OLED<br/>128×64"]
     MCU -->|"PB10=SCL  PB11=SDA<br/>软件I2C（MyI2C.c）"| O2["MPU6050<br/>加速度 + 陀螺仪"]
     MCU -->|"PA0 = ADC1_CH0<br/>电池电压采样"| O3["电池 VBAT → 电量%"]
     MCU -->|"PA4=K3  PA6=K2  PB1=K1<br/>上拉输入 · 短按/长按"| O4["按键 ×3"]
@@ -146,7 +146,7 @@ flowchart LR
 
 | MCU 外设 | 引脚 | 驱动模块 | 用途 |
 |---|---|---|---|
-| GPIOB 模拟 I2C | PB8 / PB9 | `OLED.c` | 0.96" OLED 屏幕（软件 I2C） |
+| GPIOA 模拟 I2C | PA8 / PA9 | `OLED.c` | 0.96" OLED 屏幕（软件 I2C） |
 | GPIOB 模拟 I2C | PB10 / PB11 | `MyI2C.c` → `MPU6050.c` | 六轴传感器 MPU6050 |
 | ADC1 通道 0 | PA0 | `AD.c` | 电池电压采样 → 电量百分比 |
 | GPIOA/B 输入 | PA4 / PA6 / PB1 | `Key.c` | 3 个按键（K1/K2/K3，K3 支持长按） |

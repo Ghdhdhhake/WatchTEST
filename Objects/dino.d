@@ -30,7 +30,7 @@
 .\objects\dino.o: .\Library\misc.h
 .\objects\dino.o: Hardware\OLED.h
 .\objects\dino.o: Hardware\OLED_Data.h
-.\objects\dino.o: Hardware\Key.h
+.\objects\dino.o: Hardware\encoder.h
 .\objects\dino.o: H:\Keil 5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\dino.o: H:\Keil 5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\dino.o: .\System\Delay.h

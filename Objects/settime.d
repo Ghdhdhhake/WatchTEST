@@ -31,4 +31,4 @@
 .\objects\settime.o: .\System\MyRTC.h
 .\objects\settime.o: Hardware\OLED.h
 .\objects\settime.o: Hardware\OLED_Data.h
-.\objects\settime.o: Hardware\Key.h
+.\objects\settime.o: Hardware\encoder.h

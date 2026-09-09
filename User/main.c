@@ -3,7 +3,7 @@
 #include "OLED.h"
 #include "menu.h"
 #include "Timer.h"
-#include "Key.h"
+#include "encoder.h"
 #include "dino.h"
 //This si from branch dev
 /**
@@ -63,8 +63,6 @@ void TIM2_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
 	{
-		Key3_Tick();
-		Key_Tick();
 		StopWatch_Tick();
 		Dino_Tick();
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);

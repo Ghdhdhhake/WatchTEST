@@ -31,7 +31,7 @@
 .\objects\menu.o: Hardware\OLED.h
 .\objects\menu.o: Hardware\OLED_Data.h
 .\objects\menu.o: .\System\MyRTC.h
-.\objects\menu.o: Hardware\Key.h
+.\objects\menu.o: Hardware\encoder.h
 .\objects\menu.o: Hardware\LED.h
 .\objects\menu.o: Hardware\SetTime.h
 .\objects\menu.o: Hardware\menu.h

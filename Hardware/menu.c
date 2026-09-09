@@ -12,7 +12,7 @@
 #include "stm32f10x.h"                  // Device header
 #include "OLED.h"
 #include "MyRTC.h"                                                                                                                                                                                                     
-#include "Key.h"
+#include "encoder.h"
 #include "LED.h"
 #include "SetTime.h"
 #include "menu.h"
@@ -35,7 +35,7 @@ uint8_t KeyNum;//用于存储按键值
 void Peripheral_Init(void)
 {
 	MyRTC_Init();
-	Key_Init();
+	Encoder_Init();
 	LED_Init();
 	MPU6050_Init();
 	AD_Init();
@@ -104,7 +104,7 @@ int First_Page_Clock(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 
 		if(KeyNum==1)//上一项
 		{
@@ -160,7 +160,7 @@ int SettingPage(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t setflag_temp=0;
 		if(KeyNum==1)//上一项
 		{
@@ -295,7 +295,7 @@ int Menu(void)
 	uint8_t DirectFlag=2;//置1：移动到上一项；置2：移动到下一项
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t menu_flag_temp=0;
 		if(KeyNum==1)//上一项
 		{
@@ -390,7 +390,7 @@ int StopWatch(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t stopwatch_flag_temp=0;
 		if(KeyNum==1)//上一项
 		{
@@ -461,7 +461,7 @@ int LED(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t led_flag_temp=0;
 		if(KeyNum==1)//上一项
 		{
@@ -556,7 +556,7 @@ int MPU6050(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==3)
 		{
 			OLED_Clear();
@@ -586,7 +586,7 @@ int Game(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t game_flag_temp=0;
 		if(KeyNum==1)//上一项
 		{
@@ -669,7 +669,7 @@ int Emoji(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==3)
 		{
 			OLED_Clear();
@@ -696,7 +696,7 @@ int Gradienter(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==3)
 		{
 			OLED_Clear();

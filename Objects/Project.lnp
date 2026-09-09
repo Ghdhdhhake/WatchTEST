@@ -32,6 +32,7 @@
 ".\objects\oled_data.o"
 ".\objects\menu.o"
 ".\objects\key.o"
+".\objects\encoder.o"
 ".\objects\led.o"
 ".\objects\settime.o"
 ".\objects\mpu6050.o"

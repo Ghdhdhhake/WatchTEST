@@ -1,7 +1,7 @@
 #include "stm32f10x.h"                  // Device header
 #include "MyRTC.h"
 #include "OLED.h"
-#include "Key.h"
+#include "encoder.h"
 
 void Show_SetTime_FirstUI(void)
 {
@@ -33,7 +33,7 @@ int SetYear(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(0,1);
@@ -59,7 +59,7 @@ int SetMonth(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(1,1);
@@ -87,7 +87,7 @@ int SetDay(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(2,1);
@@ -115,7 +115,7 @@ int SetHour(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(3,1);
@@ -143,7 +143,7 @@ int SetMin(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(4,1);
@@ -171,7 +171,7 @@ int SetSec(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		if(KeyNum==1)//数值加1
 		{
 			Change_RTC_Time(5,1);
@@ -200,7 +200,7 @@ int SetTime(void)
 {
 	while(1)
 	{
-		KeyNum=Key_GetNum();
+		KeyNum=Encoder_GetKeyNum();
 		uint8_t set_time_flag_temp=0;
 		if(KeyNum==1)//上一项
 		{

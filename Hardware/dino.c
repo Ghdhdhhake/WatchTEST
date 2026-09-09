@@ -1,6 +1,6 @@
 #include "stm32f10x.h"                  // Device header
 #include "OLED.h"
-#include "Key.h"
+#include "encoder.h"
 #include <stdlib.h>
 #include <math.h>
 #include "Delay.h"
@@ -79,8 +79,8 @@ struct Object_Position dino;
 //œ‘ æ–°ø÷¡˙
 void Show_Dino(void)
 {
-	KeyNum=Key_GetNum();
-	if(KeyNum==1)dino_jump_flag=1;
+	if (Encoder_Scan() == ENCODER_PRESS)
+	dino_jump_flag=1;
 	Jump_Pos=28*sin((float)(pi*jump_t/1000));
 	
 	if(dino_jump_flag==0)
