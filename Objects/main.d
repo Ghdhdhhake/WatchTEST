@@ -28,10 +28,8 @@
 .\objects\main.o: .\Library\stm32f10x_usart.h
 .\objects\main.o: .\Library\stm32f10x_wwdg.h
 .\objects\main.o: .\Library\misc.h
-.\objects\main.o: .\System\Delay.h
 .\objects\main.o: .\Hardware\OLED.h
 .\objects\main.o: .\Hardware\OLED_Data.h
 .\objects\main.o: .\Hardware\menu.h
 .\objects\main.o: .\System\Timer.h
-.\objects\main.o: .\Hardware\encoder.h
 .\objects\main.o: .\Hardware\dino.h

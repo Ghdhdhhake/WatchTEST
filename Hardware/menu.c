@@ -123,11 +123,6 @@ int First_Page_Clock(void)
 			return clkflag;
 		}
 		
-		else if(KeyNum==4)
-		{
-			GPIO_ResetBits(GPIOB, GPIO_Pin_13);//长按Key3,KeyNum等于4，拉低CTL引脚（PB13),单片机关机
-			GPIO_SetBits(GPIOB, GPIO_Pin_12);//拉高BAT_ADC_EN引脚（PB12),ADC检测电路断开
-		};
 		switch(clkflag)
 		{
 			case 1:
@@ -631,8 +626,25 @@ int Game(void)
 
 /*----------------------------------动态表情包-------------------------------------*/
 
-//显示动态表情包
-void Show_Emoji_UI(void)
+static uint8_t Emoji_WaitForExit(uint16_t delay_ms)
+{
+	while(delay_ms > 0)
+	{
+		uint16_t wait_ms = delay_ms > 10 ? 10 : delay_ms;
+		Delay_ms(wait_ms);
+		delay_ms -= wait_ms;
+
+		if(Encoder_GetKeyNum() == 3)
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+//显示动态表情包；返回1表示动画期间检测到退出按键
+uint8_t Show_Emoji_UI(void)
 {
 	/*闭眼*/
 	for(uint8_t i=0;i<3;i++)
@@ -644,7 +656,7 @@ void Show_Emoji_UI(void)
 		OLED_DrawEllipse(88,32,6,6-i,1);//右眼
 		OLED_ShowImage(54,40,20,20,Mouth);
 		OLED_Update();
-		Delay_ms(100);
+		if(Emoji_WaitForExit(100)) return 1;
 	}
 	
 	/*睁眼*/
@@ -657,11 +669,12 @@ void Show_Emoji_UI(void)
 		OLED_DrawEllipse(88,32,6,4+i,1);//右眼
 		OLED_ShowImage(54,40,20,20,Mouth);
 		OLED_Update();
-		Delay_ms(100);
+		if(Emoji_WaitForExit(100)) return 1;
 	}
 	
-	Delay_ms(500);
+	if(Emoji_WaitForExit(500)) return 1;
 	
+	return 0;
 }
 
 //用按键控制退出动态表情包界面的函数
@@ -677,7 +690,12 @@ int Emoji(void)
 			return 0;
 		}
 		
-		Show_Emoji_UI();
+		if(Show_Emoji_UI())
+		{
+			OLED_Clear();
+			OLED_Update();
+			return 0;
+		}
 		
 	}
 }

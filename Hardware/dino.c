@@ -70,7 +70,6 @@ void Show_Cloud(void)
 }
 
 uint8_t dino_jump_flag=0;//0:±¼ÅÜ£¬1:ÌøÔ¾
-extern uint8_t KeyNum;
 uint16_t jump_t;
 uint8_t Jump_Pos;
 extern double pi;

@@ -1,9 +1,7 @@
 #include "stm32f10x.h"                  // Device header
-#include "Delay.h"
 #include "OLED.h"
 #include "menu.h"
 #include "Timer.h"
-#include "encoder.h"
 #include "dino.h"
 //This si from branch dev
 /**
@@ -35,16 +33,10 @@ int main(void)
 	Peripheral_Init();//外设初始化函数
 	int clkflag1;
 	
-	extern int press_time;
-	extern uint8_t Key_Num;
 	Timer_Init();
 	uint8_t begin_flag=1;
 	while (1)
 	{
-//		OLED_ShowNum(64,0,press_time,4,OLED_6X8);
-//		OLED_ShowNum(64,8,Key_Num,1,OLED_6X8);
-//		OLED_Update();
-		
 		clkflag1=First_Page_Clock();
 		if(begin_flag==1)
 		{
