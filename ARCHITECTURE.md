@@ -10,7 +10,9 @@
 Code/
 ├── Project.uvprojx          # Keil 工程文件
 ├── User/                    # ① 应用层：主函数、中断服务
-│   ├── main.c               #   主循环 + TIM2 中断（软件节拍调度）
+│   ├── main.c               #   硬件初始化 + 启动 FreeRTOS
+│   ├── AppTasks.c/.h        #   UI、输入、1ms 时基任务
+│   ├── FreeRTOSConfig.h     #   内核、内存及中断优先级配置
 │   ├── stm32f10x_it.c/.h    #   中断服务函数
 │   └── stm32f10x_conf.h     #   外设库配置头
 ├── Hardware/                # ② 板级驱动层 + 功能/UI 层
@@ -25,12 +27,12 @@ Code/
 │   ├── SetTime.c/.h         #   校时界面
 │   └── dino.c/.h            #   恐龙快跑小游戏
 ├── System/                  # ③ 系统服务层
-│   ├── Delay.c/.h           #   SysTick 软件延时（us/ms/s）
-│   ├── Timer.c/.h           #   TIM2 1ms 时基中断
+│   ├── Delay.c/.h           #   DWT 微秒延时 + RTOS 任务延时
 │   └── MyRTC.c/.h           #   RTC 实时时钟 + BKP 备份寄存器
-├── Library/                 # ④ STM32F10x 标准外设库（StdPeriph）
+├── FreeRTOS/                # ④ FreeRTOS V9 内核 + RVDS Cortex-M3 端口
+├── Library/                 # ⑤ STM32F10x 标准外设库（StdPeriph）
 │   └── stm32f10x_*.c/.h     #   GPIO TIM ADC RTC BKP PWR NVIC I2C …
-├── Start/                   # ⑤ 启动与内核
+├── Start/                   # ⑥ 启动与内核
 │   ├── startup_stm32f10x_md.s   # 启动文件（中容量 Flash 64KB）
 │   ├── core_cm3.c/.h            # Cortex-M3 内核（CMSIS）
 │   ├── stm32f10x.h              # 寄存器定义
@@ -46,9 +48,9 @@ Code/
 ```mermaid
 flowchart TB
     subgraph APP["① 应用层  User/"]
-        MAIN["main.c<br/>main() 主循环"]
+        MAIN["main.c<br/>初始化并启动调度器"]
         INIT["OLED_Init + Peripheral_Init<br/>开机初始化"]
-        IT["stm32f10x_it.c<br/>TIM2_IRQHandler 中断服务"]
+        TASKS["AppTasks.c<br/>UI · Input · Timebase"]
     end
 
     subgraph FUNC["② 功能/UI 层  Hardware/menu.c"]
@@ -57,13 +59,19 @@ flowchart TB
         TICK["软件节拍 Tick<br/>StopWatch_Tick · Dino_Tick"]
     end
 
-    subgraph SYS["③ 系统服务层  System/"]
-        MYRTC["MyRTC.c<br/>RTC 实时时钟 + BKP 备份"]
-        TIMER["Timer.c<br/>TIM2 1ms 时基中断"]
-        DELAY["Delay.c<br/>SysTick 延时 us/ms/s"]
+    subgraph RTOS["③ FreeRTOS 调度层"]
+        INPUT["InputTask<br/>2ms 编码器采样"]
+        QUEUE["Encoder Event Queue"]
+        TIMEBASE["TimebaseTask<br/>1ms 软件节拍"]
+        UI["UiTask<br/>页面与 OLED 独占"]
     end
 
-    subgraph DRV["④ 板级驱动层  Hardware/"]
+    subgraph SYS["④ 系统服务层  System/"]
+        MYRTC["MyRTC.c<br/>RTC 实时时钟 + BKP 备份"]
+        DELAY["Delay.c<br/>DWT us + vTaskDelay ms"]
+    end
+
+    subgraph DRV["⑤ 板级驱动层  Hardware/"]
         OLED["OLED.c + OLED_Data.c<br/>屏幕驱动 · 绘图 · 字库图标"]
         MPU["MPU6050.c<br/>六轴传感器驱动"]
         MYI2C["MyI2C.c<br/>软件 I2C 总线"]
@@ -74,26 +82,27 @@ flowchart TB
         DINO["dino.c 恐龙游戏"]
     end
 
-    subgraph BSP["⑤ 底层支撑  Start/ + Library/"]
+    subgraph BSP["⑥ 底层支撑  Start/ + Library/"]
         START["Start/<br/>启动文件 · Cortex-M3 内核<br/>系统时钟 72MHz"]
         LIB["Library/<br/>标准外设库 StdPeriph<br/>GPIO · TIM · ADC · RTC · BKP · PWR · NVIC…"]
     end
 
-    subgraph HW["⑥ 硬件外设"]
+    subgraph HW["⑦ 硬件外设"]
         H_OLED["0.96 寸 OLED 屏 128×64"]
         H_MPU["MPU6050 六轴 IMU"]
         H_KEY["旋转编码器"]
-        H_LED["LED ×3"]
+        H_LED["LED / 手电筒"]
         H_BAT["电池 VBAT"]
         H_XTAL["32.768kHz LSE 晶振"]
     end
 
     %% ===== 调用关系 =====
     MAIN --> INIT
-    INIT --> MENU
-    MAIN --> IT
-    IT --> TIMER
-    TIMER --> TICK
+    INIT --> TASKS
+    TASKS --> INPUT & TIMEBASE & UI
+    INPUT --> KEY --> QUEUE --> UI
+    TIMEBASE --> TICK
+    UI --> MENU
     MENU --> APPS
     APPS --> OLED & MYRTC & KEY & LED & MPU & AD
     APPS --> SETTIME & DINO
@@ -103,7 +112,7 @@ flowchart TB
     %% ===== 驱动依赖 =====
     MPU --> MYI2C
     MYI2C --> DELAY
-    KEY --> DELAY
+    INPUT --> DELAY
 
     %% ===== 硬件连接 =====
     OLED --> H_OLED
@@ -120,7 +129,6 @@ flowchart TB
     LED --> LIB
     AD --> LIB
     MYRTC --> LIB
-    TIMER --> LIB
     START --> LIB
 ```
 
@@ -138,8 +146,8 @@ flowchart LR
     MCU -->|"PB3=CLK  PB4=DT  PB5=SW<br/>上拉输入"| O4["旋转编码器"]
     MCU -->|"PB15<br/>推挽输出"| O5["LED / 手电筒"]
     MCU -->|"PC14/PC15 = LSE<br/>32.768kHz"| O6["RTC 晶振"]
-    MCU -->|"TIM2 更新中断<br/>1ms 系统节拍"| O7["时间片调度<br/>按键 · 秒表 · 游戏"]
-    MCU -->|"SysTick"| O8["Delay 延时"]
+    MCU -->|"SysTick 1ms"| O7["FreeRTOS 抢占调度"]
+    MCU -->|"DWT CYCCNT"| O8["微秒延时"]
 ```
 
 ### 外设资源一览表
@@ -151,9 +159,9 @@ flowchart LR
 | ADC1 通道 0 | PA0 | `AD.c` | 电池电压采样 → 电量百分比 |
 | GPIOB 输入 | PB3 / PB4 / PB5 | `encoder.c` | 旋转编码器 CLK / DT / SW |
 | GPIOB 推挽输出 | PB15 | `LED.c` | 指示灯 / 手电筒 |
-| TIM2 | 内部时钟 | `Timer.c` | 1ms 时基中断，驱动各模块 Tick |
 | RTC + BKP + PWR | PC14/PC15（LSE） | `MyRTC.c` | 实时时钟（年月日时分秒），掉电保存 |
-| SysTick | 内核 | `Delay.c` | 微秒/毫秒/秒级延时 |
+| SysTick | 内核 | FreeRTOS | 1ms 抢占调度 tick |
+| DWT CYCCNT | 内核 | `Delay.c` | 微秒级忙等待 |
 
 ---
 
@@ -163,10 +171,10 @@ flowchart LR
 |---|---|---|---|
 | 首页时钟 | `First_Page_Clock()` | MyRTC、AD、OLED | 显示日期时间 + 电池图标电量 |
 | 时间设置 | `SettingPage()` / `SetTime()` | MyRTC、Key、OLED | 按键调整 RTC 时间 |
-| 秒表 | `StopWatch()` | Timer Tick、Key、OLED | 1ms 节拍计时，多状态切换 |
+| 秒表 | `StopWatch()` | TimebaseTask、Encoder、OLED | 1ms 节拍计时，多状态切换 |
 | 手电筒 | `LED()` | LED、Key、OLED | 控制 LED 亮灭 |
 | 姿态显示 | `MPU6050()` | MPU6050、OLED | 读取六轴数据绘图 |
-| 恐龙游戏 | `Game()` / `dino.c` | OLED、Key、Timer Tick | 跳跃躲避小游戏 |
+| 恐龙游戏 | `Game()` / `dino.c` | OLED、Encoder、TimebaseTask | 跳跃躲避小游戏 |
 | 动态表情 | `Emoji()` | OLED、Key | 表情动画 |
 | 水平仪 | `Gradienter()` | MPU6050、OLED、math | 根据倾角绘制水平指示 |
 
@@ -174,8 +182,8 @@ flowchart LR
 
 ## 五、嵌入式学习要点（如何读懂这个工程）
 
-1. **程序入口**：`main.c` → 先初始化 OLED，再 `Peripheral_Init()`（`menu.c` 中统一初始化 RTC/按键/LED/MPU6050/ADC），最后进入 `while(1)` 轮询按键 → 首页时钟/菜单跳转。
-2. **前后台系统**：前台是 `while(1)` 主循环（轮询旋转编码器、刷新界面），后台是 TIM2 中断（每 1ms 执行 `StopWatch_Tick / Dino_Tick` 等软件节拍，实现计时和游戏动画）。
+1. **程序入口**：`main.c` → 初始化 DWT、OLED 和外设 → 创建三个应用任务 → 启动 FreeRTOS 调度器。
+2. **实时调度**：InputTask 每 2ms 扫描旋转编码器并写事件队列；TimebaseTask 每 1ms 执行 `StopWatch_Tick / Dino_Tick`；UiTask 消费输入事件并独占 OLED。
 3. **软件 I2C**：`OLED` 与 `MPU6050` 均用 GPIO 位操作模拟 I2C 时序（`OLED.c` 自带、`MyI2C.c` 通用），适合初学者理解 I2C 协议；`MPU6050.c` 通过 `MyI2C` 读写寄存器。
-4. **分层思想**：`Hardware/`（驱动）只做"某外设怎么用"，`System/`（服务）提供"时间/延时/节拍"能力，`menu.c`（UI）组合二者实现功能，`main.c` 只负责初始化与调度 —— 这是嵌入式工程最常见的分层结构。
+4. **分层思想**：`Hardware/` 负责外设，`System/` 提供 RTC 和延时，`AppTasks.c` 负责实时调度，`menu.c` 组合功能，`main.c` 只负责初始化和启动内核。
 5. **标准外设库**：`Library/` 是 ST 官方 StdPeriph 库，所有底层寄存器操作都被封装为 `GPIO_Init`、`TIM_TimeBaseInit`、`RTC_` 等函数，`Start/` 提供启动代码与时钟初始化。

@@ -338,7 +338,7 @@ int Menu(void)
 
 /*----------------------------------秒表-------------------------------------*/
 
-uint8_t hour,min,sec;
+volatile uint8_t hour,min,sec;
 //显示秒表界面的函数
 void Show_StopWatch_UI(void)
 {
@@ -349,7 +349,7 @@ void Show_StopWatch_UI(void)
 	OLED_ShowString(88,44,"清除",OLED_8X16);
 }
 
-uint8_t start_timing_flag;//1：开始，0：停止
+volatile uint8_t start_timing_flag;//1：开始，0：停止
 
 //显示计时器的函数
 void StopWatch_Tick(void)

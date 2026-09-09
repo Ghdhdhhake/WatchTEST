@@ -1,8 +1,10 @@
 #include "stm32f10x.h"                  // Device header
+#include "Delay.h"
 #include "OLED.h"
 #include "menu.h"
-#include "Timer.h"
-#include "dino.h"
+#include "AppTasks.h"
+#include "FreeRTOS.h"
+#include "task.h"
 //This si from branch dev
 /**
   * 坐标轴定义：
@@ -27,37 +29,23 @@
 
 int main(void)
 {
-	/*OLED初始化*/
-	OLED_Init();
-	OLED_Clear();//清屏
-	Peripheral_Init();//外设初始化函数
-	int clkflag1;
-	
-	Timer_Init();
-	uint8_t begin_flag=1;
-	while (1)
-	{
-		clkflag1=First_Page_Clock();
-		if(begin_flag==1)
-		{
-			clkflag1=0;
-			begin_flag=0;
-		}
-		if(clkflag1==1){Menu();}//菜单
-		else if(clkflag1==2){SettingPage();}//设置
-		
-		
-	}
-}
+	Delay_Init();
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
-// 定时器中断函数，可以复制到使用它的地方
-void TIM2_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	OLED_Init();
+	Peripheral_Init();
+
+	if(AppTasks_Create() != pdPASS)
 	{
-		StopWatch_Tick();
-		Dino_Tick();
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		for( ;; )
+		{
+		}
+	}
+
+	vTaskStartScheduler();
+
+	for( ;; )
+	{
 	}
 }
 

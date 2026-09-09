@@ -1,6 +1,8 @@
 #include "stm32f10x.h"
 #include "delay.h"
 #include "encoder.h"
+#include "FreeRTOS.h"
+#include "queue.h"
 
 #define ENCODER_CLK_PIN      GPIO_Pin_3
 #define ENCODER_DT_PIN       GPIO_Pin_4
@@ -10,6 +12,7 @@
 /* Most encoder modules generate two valid phase changes per detent.
  * Use one UI event per detent so the small OLED menu feels responsive. */
 #define ENCODER_STEPS_PER_EVENT 2
+#define ENCODER_QUEUE_LENGTH    8
 
 #define ENCODER_CLK_READ() \
     GPIO_ReadInputDataBit(ENCODER_GPIO_PORT, ENCODER_CLK_PIN)
@@ -21,6 +24,7 @@
 static uint8_t Encoder_LastAB;
 static uint8_t Encoder_LastSW;
 static int8_t Encoder_Step;
+static QueueHandle_t Encoder_EventQueue;
 
 void Encoder_Init(void)
 {
@@ -44,9 +48,11 @@ void Encoder_Init(void)
                                ENCODER_DT_READ());
     Encoder_LastSW = ENCODER_SW_READ();
     Encoder_Step = 0;
+    Encoder_EventQueue = xQueueCreate(ENCODER_QUEUE_LENGTH,
+                                      sizeof(Encoder_Event));
 }
 
-Encoder_Event Encoder_Scan(void)
+static Encoder_Event Encoder_Scan(void)
 {
     static const int8_t TransitionTable[16] = {
          0, -1,  1,  0,
@@ -91,11 +97,37 @@ Encoder_Event Encoder_Scan(void)
     return ENCODER_NONE;
 }
 
-/* Map encoder actions to the existing UI input convention:
+void Encoder_Poll(void)
+{
+    Encoder_Event event = Encoder_Scan();
+
+    if((event != ENCODER_NONE) && (Encoder_EventQueue != NULL))
+    {
+        if(xQueueSend(Encoder_EventQueue, &event, 0) != pdPASS)
+        {
+            Encoder_Event discarded_event;
+            (void)xQueueReceive(Encoder_EventQueue, &discarded_event, 0);
+            (void)xQueueSend(Encoder_EventQueue, &event, 0);
+        }
+    }
+}
+
+uint8_t Encoder_IsReady(void)
+{
+    return Encoder_EventQueue != NULL;
+}
+
+/* Map queued encoder actions to the existing UI input convention:
  * 1 = previous, 2 = next, 3 = confirm. */
 uint8_t Encoder_GetKeyNum(void)
 {
-    Encoder_Event event = Encoder_Scan();
+    Encoder_Event event;
+
+    if((Encoder_EventQueue == NULL) ||
+       (xQueueReceive(Encoder_EventQueue, &event, 0) != pdPASS))
+    {
+        return 0;
+    }
 
     if (event == ENCODER_LEFT)
     {

@@ -9,14 +9,14 @@
 struct Object_Position{
 	uint8_t minX,minY,maxX,maxY;
 };
-int Score;
+volatile int Score;
 //显示分数，单位是0.1s
 void Show_Score(void)
 {
 	OLED_ShowNum(98,0,Score,5,OLED_6X8);
 }
 
-uint16_t Ground_Pos;
+volatile uint16_t Ground_Pos;
 //显示地面，把地面数组中的数据直接写入OLED显存数组中去
 void Show_Ground(void)
 {
@@ -42,7 +42,7 @@ void Show_Ground(void)
 }
 
 uint8_t barrier_flag;
-uint8_t Barrier_Pos;
+volatile uint8_t Barrier_Pos;
 
 struct Object_Position barrier;
 
@@ -62,15 +62,15 @@ void Show_Barrier(void)
 	barrier.maxY=62;
 }
 
-uint8_t Cloud_Pos;
+volatile uint8_t Cloud_Pos;
 //显示云朵
 void Show_Cloud(void)
 {
 	OLED_ShowImage(127-Cloud_Pos,9,16,8,Cloud);
 }
 
-uint8_t dino_jump_flag=0;//0:奔跑，1:跳跃
-uint16_t jump_t;
+volatile uint8_t dino_jump_flag=0;//0:奔跑，1:跳跃
+volatile uint16_t jump_t;
 uint8_t Jump_Pos;
 extern double pi;
 
@@ -78,7 +78,7 @@ struct Object_Position dino;
 //显示小恐龙
 void Show_Dino(void)
 {
-	if (Encoder_Scan() == ENCODER_PRESS)
+	if (Encoder_GetKeyNum() == 3)
 	dino_jump_flag=1;
 	Jump_Pos=28*sin((float)(pi*jump_t/1000));
 	

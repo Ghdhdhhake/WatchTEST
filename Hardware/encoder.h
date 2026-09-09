@@ -12,7 +12,8 @@ typedef enum
 } Encoder_Event;
 
 void Encoder_Init(void);
-Encoder_Event Encoder_Scan(void);
+void Encoder_Poll(void);
+uint8_t Encoder_IsReady(void);
 uint8_t Encoder_GetKeyNum(void);
 
 #endif

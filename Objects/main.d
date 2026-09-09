@@ -28,8 +28,18 @@
 .\objects\main.o: .\Library\stm32f10x_usart.h
 .\objects\main.o: .\Library\stm32f10x_wwdg.h
 .\objects\main.o: .\Library\misc.h
+.\objects\main.o: .\System\Delay.h
 .\objects\main.o: .\Hardware\OLED.h
 .\objects\main.o: .\Hardware\OLED_Data.h
 .\objects\main.o: .\Hardware\menu.h
-.\objects\main.o: .\System\Timer.h
-.\objects\main.o: .\Hardware\dino.h
+.\objects\main.o: User\AppTasks.h
+.\objects\main.o: .\FreeRTOS\Source\include\FreeRTOS.h
+.\objects\main.o: H:\Keil 5\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\main.o: .\User\FreeRTOSConfig.h
+.\objects\main.o: .\FreeRTOS\Source\include\projdefs.h
+.\objects\main.o: .\FreeRTOS\Source\include\portable.h
+.\objects\main.o: .\FreeRTOS\Source\include\deprecated_definitions.h
+.\objects\main.o: .\FreeRTOS\Source\portable\RVDS\ARM_CM3\portmacro.h
+.\objects\main.o: .\FreeRTOS\Source\include\mpu_wrappers.h
+.\objects\main.o: .\FreeRTOS\Source\include\task.h
+.\objects\main.o: .\FreeRTOS\Source\include\list.h
